@@ -24,6 +24,7 @@ import time
 from background import Background
 from greg import Greg
 from snowball import Snowball
+from kid import Kid
 
 class Main:
     def __init__(self):
@@ -44,6 +45,13 @@ class Main:
         self.greg = Greg(self)
         # 雪球对象
         self.snowballs = pygame.sprite.Group()
+        #所有实体
+        self.mobs = []
+        # 熊孩子对象
+        self.kids = pygame.sprite.Group()
+        self.kids.add(Kid(self))
+        self.kids.add(Kid(self))
+
 
     def check(self):
         for event in pygame.event.get():
@@ -52,7 +60,7 @@ class Main:
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown(event.key)                   
             elif event.type == pygame.KEYUP:
-                self._check_keyup(event.key)
+                self._check_keyup(event.key)   
 
     def _check_keydown(self,event):
         # WASD键控制Greg的移动
@@ -76,7 +84,8 @@ class Main:
 
         # 测试键，正式版要删掉
         elif event == pygame.K_SPACE:
-            print(f'timer:{self.timer}')
+            for kid in self.kids.sprites():
+                print(kid.target)
         # esc键退出
         elif event == pygame.K_ESCAPE:
             sys.exit()
@@ -111,19 +120,39 @@ class Main:
         # 四舍五入到整数
         self.timer = round(self.timer,1)
 
+    #刷新熊孩子
+    def udpate_kids(self):
+        self.kids.update()
+        self.kids.draw(self.screen)
+    
+    #刷新实体
+    def update_mobs(self):
+        #重置
+        #实体包括所有的熊孩子和Greg
+        self.mobs = []
+        for kid in self.kids.sprites():
+            self.mobs.append(kid)
+        self.mobs.append(self.greg)
+
     def update(self):
         # 刷新背景
         self.background.blitme()
+        
+        # 刷新雪球
+        self.update_snowballs()
 
         # 刷新Greg ^_^
         self.greg.blitme()
         self.greg.update()
 
-        # 刷新雪球
-        self.update_snowballs()
-
         # 刷新计时器
         self.update_timer()
+
+        #刷新实体
+        self.update_mobs()
+    
+        #刷新熊孩子
+        self.udpate_kids()
 
         pygame.display.flip()
         
